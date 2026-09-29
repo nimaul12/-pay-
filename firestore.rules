@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Specific Admin UID from master instructions + runtime email fallback + admin collection
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.uid == 'TiERz9Z3dsUwUasAMAcxrkvy8hl2' ||
+        request.auth.token.email == 'funnymr976@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admins registry
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Users
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isAdmin() || (
+        isOwner(userId) && 
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Task completions
+    match /taskCompletions/{completionId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Wallet Transactions
+    match /walletTransactions/{txId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Withdrawals
+    match /withdrawals/{withdrawalId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Advertisements
+    match /advertisements/{adId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Platform Settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin Audit Logs
+    match /adminLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile with balance, earnings, status and referral info",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string", "maxLength": 20 },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "status": { "type": "string", "enum": ["active", "suspended", "blocked"] },
+        "walletBalance": { "type": "number" },
+        "totalEarnings": { "type": "number" },
+        "todayEarnings": { "type": "number" },
+        "totalWithdrawn": { "type": "number" },
+        "pendingWithdrawals": { "type": "number" },
+        "referralCode": { "type": "string", "maxLength": 20 },
+        "referredBy": { "type": "string", "maxLength": 20 },
+        "totalReferrals": { "type": "number" },
+        "referralEarnings": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "name", "role", "status", "walletBalance"]
+    },
+    "task": {
+      "title": "Task",
+      "description": "Timed earning task configured by administrator",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 500 },
+        "rewardAmount": { "type": "number" },
+        "timerDuration": { "type": "number" },
+        "dailyLimit": { "type": "number" },
+        "totalLimit": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "category": { "type": "string" },
+        "icon": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "rewardAmount", "timerDuration", "status"]
+    },
+    "taskCompletion": {
+      "title": "TaskCompletion",
+      "description": "Record of a completed task by user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "taskId": { "type": "string" },
+        "userId": { "type": "string" },
+        "rewardAmount": { "type": "number" },
+        "status": { "type": "string" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["id", "taskId", "userId", "rewardAmount", "completedAt"]
+    },
+    "walletTransaction": {
+      "title": "WalletTransaction",
+      "description": "Financial ledger entry for wallet credits and debits",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["task_reward", "ad_reward", "spin_reward", "referral_reward", "withdrawal", "admin_adjustment", "refund"] },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed", "reversed"] },
+        "description": { "type": "string", "maxLength": 200 },
+        "referenceId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "type", "amount", "status", "createdAt"]
+    },
+    "withdrawal": {
+      "title": "Withdrawal",
+      "description": "Withdrawal request for bKash or Nagad payouts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhone": { "type": "string" },
+        "paymentMethod": { "type": "string", "enum": ["bKash", "Nagad"] },
+        "accountNumber": { "type": "string", "maxLength": 20 },
+        "amount": { "type": "number" },
+        "fee": { "type": "number" },
+        "netAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "processing", "approved", "paid", "rejected", "cancelled"] },
+        "adminNote": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "paymentMethod", "accountNumber", "amount", "netAmount", "status", "createdAt"]
+    },
+    "advertisement": {
+      "title": "Advertisement",
+      "description": "Ad network script or banner configured by administrator",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "placement": { "type": "string", "enum": ["banner_top", "banner_bottom", "task_preroll", "video_ads", "social_bar", "popunder", "dashboard"] },
+        "adCode": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "placement", "adCode", "status"]
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Platform global configuration",
+      "type": "object",
+      "properties": {
+        "appName": { "type": "string" },
+        "currency": { "type": "string" },
+        "minWithdrawal": { "type": "number" },
+        "maxWithdrawal": { "type": "number" },
+        "withdrawalFeePercent": { "type": "number" },
+        "referralCommissionFixed": { "type": "number" },
+        "referralCommissionPercent": { "type": "number" },
+        "videoAdReward": { "type": "number" },
+        "videoAdDuration": { "type": "number" },
+        "spinDailyLimit": { "type": "number" },
+        "spinValues": { "type": "string" },
+        "maintenanceMode": { "type": "boolean" },
+        "userWithdrawalEnabled": { "type": "boolean" },
+        "registrationEnabled": { "type": "boolean" }
+      }
+    },
+    "adminLog": {
+      "title": "AdminLog",
+      "description": "Audit record of sensitive administrative actions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "action": { "type": "string" },
+        "target": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "adminId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "User profile document keyed by auth UID"
+    },
+    "/tasks/{taskId}": {
+      "schema": "task",
+      "description": "Available earning tasks created by admin"
+    },
+    "/taskCompletions/{completionId}": {
+      "schema": "taskCompletion",
+      "description": "Record of user task completions"
+    },
+    "/walletTransactions/{txId}": {
+      "schema": "walletTransaction",
+      "description": "Wallet ledger records for audit and transparency"
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": "withdrawal",
+      "description": "Payout requests submitted by users"
+    },
+    "/advertisements/{adId}": {
+      "schema": "advertisement",
+      "description": "Advertisement scripts and creatives"
+    },
+    "/settings/{settingId}": {
+      "schema": "settings",
+      "description": "Global application configuration"
+    },
+    "/adminLogs/{logId}": {
+      "schema": "adminLog",
+      "description": "Administrative actions audit log"
+    }
+  }
+}
